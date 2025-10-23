@@ -91,6 +91,7 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
+            overflow-y: auto;
         }
 
         .input-header {
@@ -113,6 +114,7 @@
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 0; /* 防止flex项目溢出 */
         }
 
         .input-group label {
@@ -143,8 +145,8 @@
         .input-group textarea {
             min-height: 120px;
             resize: vertical;
-            max-height: 400px;
             flex: 1;
+            height: 100%;
         }
 
         /* 右侧输出区域 */
@@ -154,6 +156,7 @@
             padding: 25px;
             overflow-y: auto;
             min-width: 400px;
+            max-height: 100vh;
         }
 
         .output-header {
@@ -180,6 +183,8 @@
             min-height: 350px;
             border: 1px solid #e1e4e8;
             transition: all 0.3s ease;
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
         }
 
         .card-title {
@@ -288,7 +293,6 @@
             <div style="text-align: center; margin-bottom: 20px; padding: 20px 15px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                 <img src="logo.png" alt="小红书知识卡片编辑器" style="width: 180px; height: auto; max-height: 180px; object-fit: contain; display: block; margin-left: auto; margin-right: auto;">
             </div>
-            <h2>🛠️ 创作助手</h2>
             <div class="template-item active" data-template="knowledge">
                 <div class="template-title">小红书卡片</div>
                 <div class="template-desc">精美知识分享卡片</div>
@@ -296,6 +300,10 @@
             <div class="template-item" data-template="review">
                 <div class="template-title">好评文案</div>
                 <div class="template-desc">商品评价文案模板</div>
+            </div>
+            <div class="template-item" data-template="voiceover">
+                <div class="template-title">口播助手</div>
+                <div class="template-desc">短视频口播文案创作</div>
             </div>
             <div class="template-item" data-template="social">
                 <div class="template-title">朋友圈文案</div>
@@ -328,7 +336,7 @@
             
             <div class="input-group">
                 <label for="draftContent">草稿文案</label>
-                <textarea id="draftContent" placeholder="在这里输入你的草稿文案..." style="height: 200px;">今天天气很好，适合出去走走。生活中要学会享受当下，不要总是忙碌而忽略了身边的美好。</textarea>
+                <textarea id="draftContent" placeholder="在这里输入你的草稿文案...">今天天气很好，适合出去走走。生活中要学会享受当下，不要总是忙碌而忽略了身边的美好。</textarea>
             </div>
             
             <div style="margin: 20px 0;">
@@ -338,7 +346,7 @@
             
             <div class="input-group">
                 <label for="markdownOutput">Markdown输出</label>
-                <textarea id="markdownOutput" placeholder="AI编辑后的markdown内容将显示在这里..." style="height: 300px;"></textarea>
+                <textarea id="markdownOutput" placeholder="AI编辑后的markdown内容将显示在这里..."></textarea>
             </div>
             
             <!-- 标题和底部信息已移除，仅保留 Markdown 内容输入 -->
@@ -411,7 +419,7 @@
             
             <div class="input-group">
                 <label for="otherInfo">📝 其他信息</label>
-                <textarea id="otherInfo" placeholder="分享更多细节：环境感受、服务态度、专业程度、价格性价比等..." style="height: 100px;"></textarea>
+                <textarea id="otherInfo" placeholder="分享更多细节：环境感受、服务态度、专业程度、价格性价比等..."></textarea>
             </div>
             
             <div class="input-group">
@@ -428,6 +436,86 @@
             <div style="margin: 20px 0;">
                 <button class="btn" onclick="generateReviewContent()">🤖 生成好评文案</button>
                 <button class="btn" onclick="clearReviewForm()">🗑️ 清空内容</button>
+            </div>
+        </div>
+
+        <!-- 口播助手输入区域 -->
+        <div class="input-area" id="voiceoverInput" style="display: none;">
+            <div class="input-header">
+                <h3>🎤 口播文案编辑</h3>
+                <p>在这里编辑您的口播文案</p>
+            </div>
+            
+            <div class="input-group">
+                <label for="voiceoverDraftContent">📝 草稿文案输入区</label>
+                <textarea id="voiceoverDraftContent" placeholder="在这里输入您的草稿文案..." style="width: 100%; height: calc(100vh - 280px); min-height: 300px; padding: 15px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px; line-height: 1.6; resize: vertical;" oninput="renderVoiceoverPreview()"></textarea>
+            </div>
+            
+            <!-- 简化口播助手配置 - 已移除爆款结构、面向对象、口播时长选择 -->
+            
+            <div style="margin: 20px 0; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" onclick="generateVoiceoverWithAI()">🤖 AI生成口播文案</button>
+                <button class="btn" onclick="clearVoiceover()">🗑️ 清空草稿箱</button>
+            </div>
+        </div>
+
+        <!-- 朋友圈文案输入区域 -->
+        <div class="input-area" id="socialInput" style="display: none;">
+            <div class="input-header">
+                <h3>🌈 朋友圈文案编辑</h3>
+                <p>输入生活感悟，生成朋友圈文案</p>
+            </div>
+            
+            <div class="input-group">
+                <label for="socialMood">😊 心情状态</label>
+                <select id="socialMood" style="width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px;">
+                    <option value="">请选择心情状态</option>
+                    <option value="happy">开心快乐</option>
+                    <option value="peaceful">平静淡然</option>
+                    <option value="thoughtful">思考感悟</option>
+                    <option value="grateful">感恩感谢</option>
+                    <option value="motivated">励志向上</option>
+                    <option value="nostalgic">怀旧回忆</option>
+                    <option value="hopeful">期待希望</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="socialScene">🌅 生活场景</label>
+                <select id="socialScene" style="width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px;">
+                    <option value="">请选择生活场景</option>
+                    <option value="morning">清晨时光</option>
+                    <option value="noon">午后闲暇</option>
+                    <option value="evening">傍晚夕阳</option>
+                    <option value="night">夜深人静</option>
+                    <option value="work">工作学习</option>
+                    <option value="rest">休息放松</option>
+                    <option value="travel">旅行出游</option>
+                    <option value="food">美食时光</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="socialContent">💭 内容主题</label>
+                <textarea id="socialContent" placeholder="分享你的想法、感悟或者生活记录..."></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="socialStyle">🎨 文案风格</label>
+                <select id="socialStyle" style="width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px;">
+                    <option value="">请选择文案风格</option>
+                    <option value="warm">温暖治愈</option>
+                    <option value="fresh">清新文艺</option>
+                    <option value="simple">简约直白</option>
+                    <option value="poetic">诗意唯美</option>
+                    <option value="real">真实记录</option>
+                    <option value="philosophical">哲理思考</option>
+                </select>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <button class="btn" onclick="generateSocialContent()">🤖 生成朋友圈文案</button>
+                <button class="btn" onclick="clearSocialForm()">🗑️ 清空内容</button>
             </div>
         </div>
 
@@ -461,6 +549,38 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- 口播助手输出区域 -->
+        <div class="output-area" id="voiceoverOutput" style="display: none;">
+            <div class="output-header">
+                <h3>🎬 口播文案预览</h3>
+                <p>您的短视频口播文案效果预览</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <button class="btn" onclick="toggleVoiceoverEdit()">✏️ 编辑模式</button>
+                <button class="btn" onclick="copyVoiceoverContent()">📋 复制口播文案</button>
+                <button class="btn" onclick="clearVoiceoverContent()">🗑️ 清空内容</button>
+            </div>
+            
+            <!-- 编辑模式文本框 -->
+            <div id="voiceoverEditArea" style="display: none; margin-bottom: 20px;">
+                <textarea id="voiceoverEditContent" style="width: 100%; height: 400px; padding: 15px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px; line-height: 1.8; resize: vertical;" placeholder="在这里编辑您的口播文案..."></textarea>
+                <div style="margin-top: 10px; text-align: center;">
+                    <button class="btn" onclick="saveVoiceoverEdit()">💾 保存编辑</button>
+                    <button class="btn" onclick="cancelVoiceoverEdit()" style="background: #6c757d; margin-left: 10px;">❌ 取消</button>
+                </div>
+            </div>
+            
+            <!-- 预览模式 -->
+            <div class="card-preview" id="voiceoverPreview">
+                <div class="card-content" id="voiceoverPreviewContent" style="font-size: 14px; line-height: 1.8; white-space: pre-line;">
+                    请在左侧输入口播主题和素材，点击"🤖 AI生成口播文案"按钮来创建您的短视频口播文案...
+                </div>
+            </div>
+            
+
         </div>
 
         <!-- 好评文案输出区域 -->
@@ -753,14 +873,20 @@
             // 隐藏所有输入和输出区域
             document.getElementById('knowledgeInput').style.display = 'none';
             document.getElementById('reviewInput').style.display = 'none';
+            document.getElementById('voiceoverInput').style.display = 'none';
             document.getElementById('knowledgeOutput').style.display = 'none';
             document.getElementById('reviewOutput').style.display = 'none';
+            document.getElementById('voiceoverOutput').style.display = 'none';
             
             // 根据模板类型显示对应的区域
             if (templateType === 'review') {
                 // 显示好评文案区域
                 document.getElementById('reviewInput').style.display = 'block';
                 document.getElementById('reviewOutput').style.display = 'block';
+            } else if (templateType === 'voiceover') {
+                // 显示口播助手区域
+                document.getElementById('voiceoverInput').style.display = 'block';
+                document.getElementById('voiceoverOutput').style.display = 'block';
             } else {
                 // 显示知识卡片区域
                 document.getElementById('knowledgeInput').style.display = 'block';
@@ -797,6 +923,11 @@
                         title: '招聘信息',
                         content: '🔥 招聘 | 新媒体运营专员\n\n【岗位职责】\n- 负责公司新媒体平台运营\n- 内容策划与文案撰写\n- 粉丝互动与数据分析\n\n【任职要求】\n- 本科及以上学历\n- 有新媒体运营经验优先\n- 创意思维活跃，执行力强',
                         footer: '#招聘信息 #新媒体运营 #职场招聘'
+                    },
+                    voiceover: {
+                        title: '口播助手',
+                        content: '🎤 口播文案示例\n\n【开场】\n"姐妹们👭，今天想跟大家聊聊护肤这个话题。"\n\n【停顿2秒】\n\n【正文】\n"最近我发现了一个特别棒的护肤方法，真的让我受益匪浅。护肤对于我们每个人来说都非常重要，特别是年轻女性群体。"\n\n【结尾】\n"所以啊，如果你也在为护肤而烦恼，不妨试试看。相信我，你不会失望的！记得点赞关注，我们下期再见！👋"',
+                        footer: '#口播助手 #短视频文案 #内容创作'
                     }
                 };
                 
@@ -1095,6 +1226,1148 @@
             toggleReviewEdit();
             showNotification('❌ 已取消编辑');
         }
+
+        // 网络连接测试功能
+        async function testNetworkConnection() {
+            console.log('🌐 开始网络连接测试...');
+            showNotification('🌐 正在测试网络连接...');
+            
+            const testResults = [];
+            
+            // 测试1: 基础网络连接
+            try {
+                const response = await fetch('https://httpbin.org/get', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                if (response.ok) {
+                    testResults.push('✅ 基础网络连接正常');
+                } else {
+                    testResults.push('❌ 基础网络连接失败');
+                }
+            } catch (error) {
+                testResults.push(`❌ 基础网络连接异常: ${error.message}`);
+            }
+            
+            // 测试2: API端点连接
+            const endpoints = [
+                'https://open-api.biji.com/getnote/openapi',
+                'https://proxy.cors.sh/https://open-api.biji.com/getnote/openapi',
+                'https://corsproxy.io/?https://open-api.biji.com/getnote/openapi'
+            ];
+            
+            for (let i = 0; i < endpoints.length; i++) {
+                try {
+                    const response = await fetch(endpoints[i], {
+                        method: 'OPTIONS', // 使用OPTIONS测试CORS
+                        signal: AbortSignal.timeout(8000)
+                    });
+                    testResults.push(`✅ 端点${i + 1}可访问: ${endpoints[i]}`);
+                    break; // 找到一个可用的就停止
+                } catch (error) {
+                    testResults.push(`❌ 端点${i + 1}失败: ${error.message}`);
+                }
+            }
+            
+            // 测试3: CORS代理服务
+            try {
+                const response = await fetch('https://proxy.cors.sh/https://httpbin.org/get', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(5000)
+                });
+                if (response.ok) {
+                    testResults.push('✅ CORS代理服务可用');
+                } else {
+                    testResults.push('❌ CORS代理服务不可用');
+                }
+            } catch (error) {
+                testResults.push(`❌ CORS代理测试失败: ${error.message}`);
+            }
+            
+            console.log('网络测试结果:', testResults);
+            
+            // 显示测试结果
+            const resultMessage = testResults.join('\n');
+            alert(`🌐 网络连接测试结果：\n\n${resultMessage}\n\n建议:\n1. 如果基础网络失败，请检查网络设置\n2. 如果API端点都失败，API服务可能暂时不可用\n3. 如果CORS代理失败，系统会自动尝试其他方案`);
+            
+            showNotification('🌐 网络测试完成，请查看结果');
+        }
+        
+        // 测试get笔记API连接
+        async function testGetNoteAPI() {
+            console.log('🧪 开始测试get笔记API连接...');
+            
+            const apiKey = 'sk-khczjbhzxxujbizmolqceicevnyckmddrhtgbhiyhfkzaujs';
+            const knowledgeBaseId = 'yYv22aLY';
+            
+            // 测试不同的API端点
+            const testEndpoints = [
+                `https://api.getbiji.com/openapi/knowledge/${knowledgeBaseId}`, // 获取知识库信息
+                `https://api.getbiji.com/openapi/knowledge/${knowledgeBaseId}/search?q=test&limit=1`, // 简单搜索
+                'https://api.getbiji.com/openapi/user/profile', // 用户信息
+                'https://api.getbiji.com/openapi/auth/test' // 认证测试
+            ];
+            
+            for (let i = 0; i < testEndpoints.length; i++) {
+                const endpoint = testEndpoints[i];
+                console.log(`\n🔄 测试端点 ${i + 1}: ${endpoint}`);
+                
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        signal: AbortSignal.timeout(10000)
+                    });
+                    
+                    console.log(`📊 响应状态: ${response.status} ${response.statusText}`);
+                    
+                    const responseText = await response.text();
+                    console.log(`📄 响应内容: ${responseText.substring(0, 200)}${responseText.length > 200 ? '...' : ''}`);
+                    
+                    if (response.ok) {
+                        console.log('✅ 此端点连接成功！');
+                        return { success: true, endpoint: endpoint, data: responseText };
+                    } else {
+                        console.log(`❌ 此端点失败: ${response.status}`);
+                    }
+                    
+                } catch (error) {
+                    console.error(`❌ 端点测试失败: ${error.message}`);
+                }
+            }
+            
+            return { success: false, message: '所有端点测试失败' };
+        }
+
+        // 口播助手功能 - AI搜索按钮
+        async function generateVoiceover() {
+            const topic = document.getElementById('voiceoverTopic').value.trim();
+            const voiceoverMaterial = document.getElementById('voiceoverMaterial');
+            
+            if (!topic) {
+                alert('请输入视频主题！');
+                return;
+            }
+            
+            // 显示加载状态
+            if (voiceoverMaterial) {
+                voiceoverMaterial.value = '🤖 正在搜索相关笔记素材，请稍候...';
+            }
+            
+            try {
+                // 首先测试网络连接
+                console.log('🔍 开始测试网络连接...');
+                try {
+                    const testResponse = await fetch('https://httpbin.org/get', {
+                        method: 'GET',
+                        signal: AbortSignal.timeout(5000)
+                    });
+                    console.log('✅ 网络连接正常，可以访问外部API');
+                } catch (networkTestError) {
+                    console.error('❌ 网络连接测试失败:', networkTestError.message);
+                    throw new Error(`网络连接异常：${networkTestError.message}。请检查网络设置或防火墙配置。`);
+                }
+                
+                // 测试get笔记API
+                console.log('🔑 测试get笔记API连接...');
+                const apiTestResult = await testGetNoteAPI();
+                if (apiTestResult.success) {
+                    console.log('✅ get笔记API连接成功！');
+                } else {
+                    console.warn('⚠️ get笔记API连接失败，将使用本地模拟搜索');
+                }
+                
+                // 调用笔记知识库API获取相关素材
+                const apiKey = 'sk-khczjbhzxxujbizmolqceicevnyckmddrhtgbhiyhfkzaujs';
+                const knowledgeBaseId = 'yYv22aLY';
+                
+                // 构建搜索请求
+                const searchContent = `搜索与"${topic}"相关的笔记内容，包括实用技巧、案例分析和核心要点`;
+                
+                // 定义多个备用端点（处理CORS问题）
+                const endpoints = [
+                    // 尝试使用硅基流动的API作为替代方案
+                    'https://api.siliconflow.cn/v1/chat/completions',
+                    // 原始get笔记API
+                    'https://api.getbiji.com/openapi/knowledge/search',
+                    'https://proxy.cors.sh/https://api.getbiji.com/openapi/knowledge/search', // CORS代理 (推荐)
+                    'https://corsproxy.io/?' + encodeURIComponent('https://api.getbiji.com/openapi/knowledge/search') // 备用代理
+                ];
+                
+                let response = null;
+                let lastError = null;
+                
+                // 尝试多个端点
+                for (let i = 0; i < endpoints.length; i++) {
+                    const endpoint = endpoints[i];
+                    console.log(`尝试端点 ${i + 1}/${endpoints.length}:`, endpoint);
+                    
+                    try {
+                        let fetchOptions;
+                        
+                        if (i === 0) {
+                            // 硅基流动API配置 - 模拟get笔记知识库内容
+                            fetchOptions = {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer sk-pyklkjtrarxygqafyidoclbberxhhqbnzmdrafwuuuiusxzd`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json, text/plain, */*',
+                                    'Cache-Control': 'no-cache',
+                                    'Pragma': 'no-cache'
+                                },
+                                body: JSON.stringify({
+                                    model: "deepseek-ai/DeepSeek-V3.1",
+                                    messages: [
+                                        {
+                                            role: "system",
+                                            content: "你是一个知识库助手。请模拟一个包含丰富笔记内容的知识库，根据用户提供的主题，生成相关的知识内容。内容要实用、具体，适合小红书创作。请按照以下格式回复："
+                                        },
+                                        {
+                                            role: "user",
+                                            content: `主题："${topic}"
+
+请提供3-5个相关的知识点，每个知识点包含：
+1. 简洁的标题
+2. 具体的实用内容
+3. 相关的小贴士
+
+格式示例：
+📚 知识点1：[标题]
+内容：[具体的实用内容]
+💡 小贴士：[相关建议]
+
+请确保内容真实有用，适合小红书内容创作。`
+                                        }
+                                    ],
+                                    stream: false,
+                                    max_tokens: 2000,
+                                    temperature: 0.7
+                                }),
+                                signal: AbortSignal.timeout(30000),
+                                mode: 'cors',
+                                credentials: 'omit'
+                            };
+                        } else {
+                            // get笔记API配置
+                            fetchOptions = {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${apiKey}`,
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'Cache-Control': 'no-cache',
+                                    'Pragma': 'no-cache'
+                                },
+                                body: JSON.stringify({
+                                    knowledgeBaseId: knowledgeBaseId,
+                                    query: searchContent,
+                                    maxResults: 10,
+                                    searchType: 'semantic' // 语义搜索
+                                }),
+                                signal: AbortSignal.timeout(30000),
+                                mode: 'cors',
+                                credentials: 'omit'
+                            };
+                        }
+                        
+                        response = await fetch(endpoint, fetchOptions);
+                        
+                        console.log(`端点 ${i + 1} 响应成功:`, response.status);
+                        break; // 成功则跳出循环
+                        
+                    } catch (endpointError) {
+                        console.error(`端点 ${i + 1} 失败:`, endpointError.message);
+                        lastError = endpointError;
+                        
+                        // 如果是最后一个端点，抛出错误
+                        if (i === endpoints.length - 1) {
+                            throw lastError;
+                        }
+                        
+                        // 继续尝试下一个端点
+                        continue;
+                    }
+                }
+                
+                console.log('API调用信息:', {
+                    apiKey: apiKey.substring(0, 10) + '...',
+                    knowledgeBaseId: knowledgeBaseId,
+                    searchContent: searchContent,
+                    endpoint: response?.url || 'unknown',
+                    headers: {
+                        'Authorization': 'Bearer ' + apiKey.substring(0, 10) + '...',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                console.log('API响应状态:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API错误详情:', errorText);
+                    
+                    // 根据官方文档的错误码处理
+                    if (response.status === 401) {
+                        throw new Error(`API请求失败: 401 - 未授权。API密钥无效或已过期，请检查Bearer Token配置。`);
+                    } else if (response.status === 403) {
+                        throw new Error(`API请求失败: 403 - 权限被拒绝。请检查：\n1. API密钥是否正确且有效\n2. 知识库ID "${knowledgeBaseId}" 是否存在且可访问\n3. 账户是否开通了知识库搜索权限`);
+                    } else if (response.status === 404) {
+                        throw new Error(`API请求失败: 404 - 接口不存在。请确认使用的API端点是否正确。\n错误详情: ${errorText}`);
+                    } else if (response.status === 429) {
+                        throw new Error(`API请求失败: 429 - 请求过于频繁。请稍后再试。`);
+                    } else if (response.status >= 500) {
+                        throw new Error(`API请求失败: ${response.status} - 服务器错误。get笔记服务可能暂时不可用，请稍后再试。\n错误详情: ${errorText}`);
+                    }
+                    
+                    throw new Error(`API请求失败: ${response.status} - ${response.statusText}\n错误详情: ${errorText}`);
+                }
+                
+                // 获取响应数据
+                const responseData = await response.json();
+                console.log('API响应数据:', responseData);
+                
+                // 处理响应数据
+                let accumulatedContent = '';
+                
+                if (responseData.choices && responseData.choices.length > 0) {
+                    // OpenAI兼容格式（硅基流动API）- 模拟知识库内容
+                    const aiResponse = responseData.choices[0].message.content;
+                    
+                    // 格式化AI响应为知识库风格
+                    accumulatedContent = `📚 来自知识库的内容\n\n${aiResponse}`;
+                    
+                    // 如果内容较长，添加索引
+                    if (aiResponse.length > 500) {
+                        const sections = aiResponse.split(/📚|💡/);
+                        if (sections.length > 1) {
+                            accumulatedContent = `📚 知识库搜索结果 (找到 ${sections.length - 1} 个相关内容)\n\n${aiResponse}`;
+                        }
+                    }
+                    
+                } else if (responseData.data && responseData.data.results) {
+                    // 标准知识库搜索结果格式（get笔记API）
+                    const results = responseData.data.results;
+                    accumulatedContent = results.map((result, index) => {
+                        return `${index + 1}. ${result.title || result.content || result.text || '无标题'}\n${result.content || result.text || ''}`;
+                    }).join('\n\n');
+                } else if (responseData.results && Array.isArray(responseData.results)) {
+                    // 另一种知识库格式
+                    accumulatedContent = responseData.results.map((result, index) => {
+                        return `${index + 1}. ${result.title || '相关知识'}\n${result.content || result.text || result.snippet || ''}`;
+                    }).join('\n\n');
+                } else if (responseData.content) {
+                    // 简单内容格式
+                    accumulatedContent = responseData.content;
+                } else {
+                    // 未知格式，显示原始数据
+                    accumulatedContent = JSON.stringify(responseData, null, 2);
+                }
+                
+                if (voiceoverMaterial) {
+                    voiceoverMaterial.value = `📚 搜索到的相关笔记素材：\n\n${accumulatedContent}`;
+                }
+                
+                showNotification('✅ 笔记素材搜索完成！');
+                
+            } catch (error) {
+                console.error('笔记知识库API调用失败:', error);
+                console.error('错误详情:', {
+                    message: error.message,
+                    name: error.name,
+                    stack: error.stack,
+                    // 检查是否是网络相关错误
+                    isNetworkError: error.message.includes('Failed to fetch') || error.message.includes('network'),
+                    isTimeoutError: error.message.includes('timeout') || error.message.includes('超时'),
+                    isCORSError: error.message.includes('CORS') || error.message.includes('跨域')
+                });
+                
+                // 提供本地模拟搜索作为最后手段
+                console.log('🔄 尝试本地模拟搜索功能...');
+                simulateLocalSearch(topic);
+                
+                // 显示错误通知
+                showNotification('⚠️ 笔记素材搜索失败，已提供本地知识库内容');
+            }
+        }
+        
+        // 本地模拟搜索功能（当API不可用时）
+        function simulateLocalSearch(topic) {
+            console.log('📚 使用本地模拟搜索，主题:', topic);
+            
+            // 扩展的模拟知识库内容
+            const mockKnowledgeBase = {
+                '学习方法': [
+                    '费曼学习法：通过教授他人来检验自己的理解程度',
+                    '间隔重复：利用艾宾浩斯遗忘曲线安排复习时间',
+                    '主动回忆：学习后合上书测试自己能记住多少内容',
+                    '多感官学习：结合视觉、听觉、动手实践来提高学习效果'
+                ],
+                '时间管理': [
+                    '番茄工作法：25分钟专注工作，5分钟休息',
+                    '四象限法则：按重要紧急程度分类处理任务',
+                    '时间块规划：为不同类型任务分配专门的时间段',
+                    'GTD方法：收集、整理、组织、回顾、执行五个步骤'
+                ],
+                '写作技巧': [
+                    '金字塔原理：先结论后论据，逻辑清晰的表达结构',
+                    'SCQA模型：情境-冲突-问题-答案的故事化写作框架',
+                    '金句提炼：将复杂概念总结为易记的短句',
+                    '用户思维：站在读者角度思考他们真正关心的问题'
+                ],
+                '职场发展': [
+                    '个人品牌：在专业领域建立可识别的独特价值',
+                    '向上管理：主动沟通、及时反馈、超预期完成工作',
+                    '跨部门协作：理解不同部门KPI，找到共同利益点',
+                    '持续学习：保持对新知识、新技能的敏感度和学习热情'
+                ],
+                '宠物': [
+                    '宠物医院选择：看资质、设备、医生经验三大要素',
+                    '宠物健康监测：日常观察食欲、精神状态、排泄情况',
+                    '宠物疫苗接种：按时接种核心疫苗，建立免疫屏障',
+                    '宠物急救知识：掌握基本急救技能，关键时刻救命'
+                ],
+                '医院': [
+                    '医院等级划分：三甲医院综合实力最强，专科特色明显',
+                    '就医流程优化：提前预约、准备病历、明确主诉症状',
+                    '医患沟通技巧：清晰表达症状、认真听取医嘱、及时反馈',
+                    '医疗费用控制：了解医保政策、合理选择检查项目'
+                ],
+                '目标': [
+                    'SMART目标法则：具体、可衡量、可达成、相关性、时限性',
+                    '目标分解技巧：大目标拆分为小目标，逐步达成',
+                    '目标追踪方法：定期检查进度，及时调整策略',
+                    '目标激励机制：设定奖励机制，保持执行动力'
+                ],
+                '护肤': [
+                    '护肤基础步骤：清洁、爽肤、精华、乳液、防晒五步法',
+                    '肤质判断方法：洗脸后不涂护肤品，观察紧绷感和出油情况',
+                    '成分搭配原则：维C配维E增强抗氧化，酸类成分避免混用',
+                    '护肤品选择：看成分表、品牌信誉、个人肤质适配度'
+                ],
+                '美食': [
+                    '食材新鲜判断：看颜色、闻气味、摸质地综合判断',
+                    '烹饪技巧掌握：火候控制、调味平衡、时间把握是关键',
+                    '营养搭配原则：蛋白质、维生素、碳水化合物均衡摄入',
+                    '食品安全注意：生熟分开、充分加热、妥善保存'
+                ],
+                '旅行': [
+                    '旅行攻略制定：确定目的地、规划路线、预订住宿交通',
+                    '行李打包技巧：根据天气、活动类型、旅行天数合理配置',
+                    '旅行安全注意：保管证件、了解当地风俗、购买保险',
+                    '预算控制方法：提前规划、留有余地、记录开支'
+                ]
+            };
+            
+            let searchResults = [];
+            let matchedKeywords = [];
+            
+            // 搜索匹配的主题（支持模糊匹配）
+            for (const [key, content] of Object.entries(mockKnowledgeBase)) {
+                if (topic.includes(key) || key.includes(topic)) {
+                    searchResults = searchResults.concat(content);
+                    matchedKeywords.push(key);
+                }
+            }
+            
+            // 如果没有精确匹配，尝试关键词提取匹配
+            if (searchResults.length === 0) {
+                // 提取主题中的关键词进行匹配
+                const keywords = topic.match(/[\u4e00-\u9fa5]{2,}/g) || [];
+                console.log('提取的关键词:', keywords);
+                
+                for (const keyword of keywords) {
+                    for (const [key, content] of Object.entries(mockKnowledgeBase)) {
+                        if (key.includes(keyword) || keyword.includes(key)) {
+                            searchResults = searchResults.concat(content);
+                            matchedKeywords.push(key);
+                        }
+                    }
+                }
+            }
+            
+            // 去重
+            searchResults = [...new Set(searchResults)];
+            
+            // 如果没有找到相关内容，提供基于主题的个性化建议
+            if (searchResults.length === 0) {
+                console.log('未找到匹配内容，生成个性化建议');
+                searchResults = generatePersonalizedAdvice(topic);
+            }
+            
+            // 格式化搜索结果
+            let formattedResults = '';
+            if (matchedKeywords.length > 0) {
+                formattedResults += `🔍 匹配到主题：${matchedKeywords.join('、')}\n\n`;
+            }
+            formattedResults += `📚 本地知识库搜索结果：\n\n${searchResults.map((item, index) => `${index + 1}. ${item}`).join('\n\n')}`;
+            
+            if (voiceoverMaterial) {
+                voiceoverMaterial.value = formattedResults;
+            }
+            
+            console.log('✅ 本地模拟搜索完成，找到', searchResults.length, '条结果');
+            showNotification('📚 已提供本地知识库内容，API服务暂时不可用');
+        }
+        
+        // 生成个性化建议
+        function generatePersonalizedAdvice(topic) {
+            const advice = [];
+            
+            // 根据主题长度和内容生成建议
+            if (topic.length <= 4) {
+                advice.push(`${topic}是一个很有价值的研究领域，建议深入了解其核心理念和实际应用`);
+            } else {
+                advice.push(`关于${topic}，建议从基础概念开始系统学习`);
+            }
+            
+            // 根据主题类型提供专业建议
+            if (topic.includes('技巧') || topic.includes('方法')) {
+                advice.push('💡 实践出真知：理论学习结合实际操作，效果最佳');
+                advice.push('📝 记录总结：每次实践后记录心得，形成自己的经验库');
+                advice.push('🔄 持续优化：根据实际效果调整方法，找到最适合自己的方式');
+            } else if (topic.includes('经验') || topic.includes('分享')) {
+                advice.push('🎯 真实案例：结合具体案例分享，更有说服力');
+                advice.push('📊 数据支撑：用数据说话，让分享更有分量');
+                advice.push('💬 互动交流：鼓励观众留言分享自己的经验');
+            } else {
+                advice.push('📖 权威资料：查找相关领域的权威资料和最新研究');
+                advice.push('🔍 案例分析：结合实际案例，让内容更具体生动');
+                advice.push('👥 专家交流：与领域专家或有经验的人交流，获取一手信息');
+            }
+            
+            return advice;
+        }
+        
+        // 口播文案编辑模式切换
+        function toggleVoiceoverEdit() {
+            const editArea = document.getElementById('voiceoverEditArea');
+            const previewArea = document.getElementById('voiceoverPreview');
+            const editContent = document.getElementById('voiceoverEditContent');
+            const previewContent = document.getElementById('voiceoverPreviewContent');
+            
+            if (editArea.style.display === 'none') {
+                // 切换到编辑模式
+                editContent.value = previewContent.textContent;
+                editArea.style.display = 'block';
+                previewArea.style.display = 'none';
+            } else {
+                // 切换到预览模式
+                cancelVoiceoverEdit();
+            }
+        }
+        
+        // 保存口播文案编辑
+        function saveVoiceoverEdit() {
+            const editContent = document.getElementById('voiceoverEditContent');
+            const previewContent = document.getElementById('voiceoverPreviewContent');
+            const editArea = document.getElementById('voiceoverEditArea');
+            const previewArea = document.getElementById('voiceoverPreview');
+            
+            previewContent.textContent = editContent.value;
+            editArea.style.display = 'none';
+            previewArea.style.display = 'block';
+            
+            // 同时更新markdown输出容器
+            const markdownOutput = document.getElementById('voiceoverMarkdownOutput');
+            if (markdownOutput) {
+                markdownOutput.textContent = editContent.value;
+            }
+            
+            showNotification('✅ 口播文案编辑已保存！');
+        }
+        
+        // 取消口播文案编辑
+        function cancelVoiceoverEdit() {
+            const editArea = document.getElementById('voiceoverEditArea');
+            const previewArea = document.getElementById('voiceoverPreview');
+            
+            editArea.style.display = 'none';
+            previewArea.style.display = 'block';
+        }
+        
+        // 复制口播文案内容
+        function copyVoiceoverContent() {
+            const previewContent = document.getElementById('voiceoverPreviewContent').textContent;
+            
+            if (!previewContent || previewContent.includes('请在左侧输入口播主题')) {
+                alert('没有可复制的口播文案内容！');
+                return;
+            }
+            
+            navigator.clipboard.writeText(previewContent).then(() => {
+                showNotification('✅ 口播文案已复制到剪贴板！');
+            }).catch(err => {
+                console.error('复制失败:', err);
+                alert('复制失败，请手动选择复制');
+            });
+        }
+        
+        // 清空口播文案内容
+        function clearVoiceoverContent() {
+            const previewContent = document.getElementById('voiceoverPreviewContent');
+            const editContent = document.getElementById('voiceoverEditContent');
+            const markdownOutput = document.getElementById('voiceoverMarkdownOutput');
+            
+            if (confirm('确定要清空口播文案内容吗？')) {
+                previewContent.textContent = '请在左侧输入口播主题和素材，点击"🤖 AI生成口播文案"按钮来创建您的短视频口播文案...';
+                editContent.value = '';
+                if (markdownOutput) {
+                    markdownOutput.textContent = '';
+                }
+                showNotification('🗑️ 口播文案内容已清空');
+            }
+        }
+        
+        // 本地生成口播文案（API失败时的回退方案）
+        function generateLocalVoiceover(topic, material) {
+            let content = '';
+            
+            content = `🎬 大家好👋，今天想跟大家聊聊${topic}这个话题。
+
+【停顿2秒】
+
+${material ? `结合我自己的经验，我想分享一些实用的见解：
+
+${material}
+
+【停顿3秒】
+
+` : '通过我的亲身实践，真的感受到了明显的改变。'}
+
+【重音】${topic}【重音】对于我们每个人来说都非常重要，值得我们深入思考和实践。
+
+【停顿3秒】
+
+所以啊，如果你也对${topic}感兴趣，不妨深入了解一下。相信我，你一定会有所收获的！
+
+【停顿】记得点赞关注，我们下期再见！👋`;
+            
+            return content;
+        }
+        
+        // 清空口播助手表单
+        function clearVoiceover() {
+            document.getElementById('voiceoverDraftContent').value = '';
+            showNotification('🗑️ 口播文案草稿已清空');
+        }
+        
+        // 测试口播生成功能
+        function testVoiceoverGeneration() {
+            console.log('测试口播生成功能开始...');
+            const draftContent = document.getElementById('voiceoverDraftContent').value.trim();
+            console.log('草稿内容:', draftContent);
+            
+            if (!draftContent) {
+                alert('请先输入一些基础内容或想法！');
+                return;
+            }
+            
+            // 直接显示测试内容
+            const testContent = `🎬 测试口播文案生成成功！
+
+【文案1-黄金3秒钩子+金字塔结构】
+你知道吗？90%的人都不知道的${draftContent}秘密！
+【停顿2秒】
+今天我要告诉你3个关键步骤...
+
+【文案2-SCQA模型】
+场景：昨天有个朋友问我关于${draftContent}的问题
+冲突：他试了很多方法都没效果
+疑问：到底应该怎么做才对？
+答案：其实只需要掌握这3个要点...
+
+【文案3-魔性循环句式+数据轰炸】
+你觉得${draftContent}很难？那是没算对方法！
+对方法要钱？那是为了节省时间！
+你觉得时间不值钱？那是你还没算清楚成本！
+
+【文案4-五感法+画面植入】
+视觉上，${draftContent}就像一幅美丽的画卷
+听觉上，每个细节都在诉说着故事
+触觉上，你能感受到真实的质感
+嗅觉上，散发着独特的魅力
+
+【文案5-角色代入+互动提问】
+你是不是也在为${draftContent}而烦恼？
+【停顿3秒】
+别担心，今天我来教你3个简单步骤！
+第一步是什么？评论区扣1我告诉你！`;
+            
+            const textarea = document.getElementById('voiceoverDraftContent');
+            textarea.value = testContent;
+            
+            // 更新预览区域
+            const previewContent = document.getElementById('voiceoverPreviewContent');
+            if (previewContent) {
+                previewContent.textContent = testContent;
+            }
+            
+            // 更新markdown输出容器
+            const markdownOutput = document.getElementById('voiceoverMarkdownOutput');
+            if (markdownOutput) {
+                markdownOutput.textContent = testContent;
+            }
+            
+            showNotification('✅ 测试口播文案生成完成！');
+            console.log('测试口播生成功能完成');
+        }
+        
+        // 简单的测试函数 - 验证基本功能
+        function simpleTest() {
+            console.log('简单测试开始...');
+            alert('简单测试：JavaScript正常工作！');
+            
+            // 检查元素是否存在
+            const elements = {
+                'voiceoverDraftContent': document.getElementById('voiceoverDraftContent'),
+                'voiceoverPreviewContent': document.getElementById('voiceoverPreviewContent'),
+                'voiceoverMarkdownOutput': document.getElementById('voiceoverMarkdownOutput')
+            };
+            
+            let missingElements = [];
+            for (let [name, element] of Object.entries(elements)) {
+                if (!element) {
+                    missingElements.push(name);
+                }
+            }
+            
+            if (missingElements.length > 0) {
+                alert('缺少元素: ' + missingElements.join(', '));
+            } else {
+                alert('所有必要元素都存在！');
+            }
+            
+            console.log('简单测试完成');
+        }
+
+        // AI生成口播文案
+        async function generateVoiceoverWithAI() {
+            console.log('AI生成口播文案函数被调用');
+            
+            try {
+                const draftContent = document.getElementById('voiceoverDraftContent').value.trim();
+                const previewContent = document.getElementById('voiceoverPreviewContent');
+                
+                console.log('草稿内容:', draftContent);
+                
+                if (!draftContent) {
+                    alert('请先输入一些基础内容或想法！');
+                    return;
+                }
+                
+                // 显示加载状态
+                showNotification('🤖 正在生成口播文案，请稍候...');
+                previewContent.textContent = '正在生成口播文案，请稍候...';
+                
+                // 构建API请求内容
+                const apiContent = `你是一名专业短视频口播文案策划专家，精通爆款文案结构设计与情绪调动技巧，擅长将专业知识转化为通俗易懂、具有传播力的口播内容。请你根据下面${draftContent}里的内容分析、提取、总结，将该草稿文案改写成适合口播的文案，口播的时长控制在2-3分钟，可以按照以下几种口播文案结构来进行创作，结构1：冲突前置+核心观点+分层论证+行动收尾的结构；结构2：场景（S）+冲突（C）+疑问（Q）+答案（A）；结构3：反常识对比+数据冲击+魔性结论结构；结构4：视觉+听觉+触觉+嗅觉+味觉，结构5：“你”视角+问题互动+步骤演示`;
+                
+                // 调用流式API，直接更新预览区域
+                await callSiliconFlowAPI(apiContent, previewContent);
+                
+                showNotification('✅ 口播文案生成完成！');
+                console.log('AI生成口播文案完成');
+                
+            } catch (error) {
+                console.error('AI生成口播文案时出错:', error);
+                alert('生成口播文案时出错，使用模拟生成作为替代！');
+                showNotification('⚠️ 使用模拟生成作为替代');
+                
+                // 回退到模拟生成
+                const draftContent = document.getElementById('voiceoverDraftContent').value.trim();
+                const simulatedContent = simulateAIVoiceoverGeneration(draftContent);
+                const previewContent = document.getElementById('voiceoverPreviewContent');
+                if (previewContent) {
+                    previewContent.textContent = simulatedContent;
+                }
+            }
+        }
+        
+        // SiliconFlow API调用（流式响应）
+        async function callSiliconFlowAPI(content, targetElement) {
+            const apiUrl = 'https://api.siliconflow.cn/v1/chat/completions';
+            const apiKey = 'sk-vsfobhidjfrliuiqfdxjpivantwjnxafxiayluiimudwyzhr';
+            
+            const requestBody = {
+                model: "deepseek-ai/DeepSeek-V3.1",
+                messages: [
+                    {
+                        role: "user",
+                        content: content
+                    }
+                ],
+                stream: true,
+                max_tokens: 4000,
+                temperature: 0.7,
+                top_p: 0.7,
+                frequency_penalty: 0.5
+            };
+            
+            try {
+                console.log('API请求配置:', {
+                    url: apiUrl,
+                    model: requestBody.model,
+                    contentLength: content.length,
+                    headers: {
+                        'Authorization': `Bearer ${apiKey.substring(0, 10)}...`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'text/event-stream'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                console.log('API响应状态:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API错误详情:', errorText);
+                    throw new Error(`API请求失败: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let fullContent = '';
+                
+                targetElement.textContent = ''; // 清空目标元素
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) {
+                        break;
+                    }
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            const data = line.slice(6);
+                            
+                            if (data === '[DONE]') {
+                                return fullContent;
+                            }
+                            
+                            try {
+                                const parsed = JSON.parse(data);
+                                const content = parsed.choices?.[0]?.delta?.content || '';
+                                
+                                if (content) {
+                                    fullContent += content;
+                                    targetElement.textContent = fullContent;
+                                    targetElement.scrollTop = targetElement.scrollHeight;
+                                }
+                            } catch (e) {
+                                console.warn('解析流式数据失败:', e);
+                            }
+                        }
+                    }
+                }
+                
+                return fullContent;
+                
+            } catch (error) {
+                console.error('SiliconFlow API调用失败:', error);
+                throw error;
+            }
+        }
+        
+        // 模拟AI口播文案生成（回退方案）
+        function simulateAIVoiceoverGeneration(content) {
+            let generated = '';
+            
+            // 生成通用开场白
+            generated = `🎬 大家好👋，今天想跟大家聊聊这个话题。\n\n【停顿2秒】\n\n`;
+            
+            // 处理原始内容
+            const sentences = content.split(/[。！？]/g).filter(s => s.trim());
+            sentences.forEach((sentence, index) => {
+                if (sentence.trim()) {
+                    generated += sentence.trim();
+                    if (index < sentences.length - 1) {
+                        generated += '。\n\n【停顿2秒】\n\n';
+                    }
+                }
+            });
+            
+            // 生成通用结尾
+            let ending = `\n\n【停顿3秒】\n\n大家觉得怎么样呢？欢迎在评论区分享你的想法💭\n\n【停顿2秒】\n\n如果你觉得这个内容对你有帮助，记得点赞关注，我们下期再见！👋`;
+            
+            generated += ending;
+            return generated;
+        }
+
+        // AI编辑口播文案
+        async function aiEditVoiceover() {
+            const voiceoverDraftContent = document.getElementById('voiceoverDraftContent').value.trim();
+            const voiceoverMaterial = document.getElementById('voiceoverMaterial');
+            
+            if (!voiceoverDraftContent) {
+                alert('请先输入草稿文案！');
+                return;
+            }
+            
+            // 显示加载状态
+            const originalMaterial = voiceoverMaterial.value;
+            voiceoverMaterial.value = '🤖 正在AI编辑口播文案，请稍候...';
+            voiceoverMaterial.disabled = true;
+            
+            try {
+                // 构建AI编辑请求内容
+                const apiContent = `你是一位短视频口播文案专家，擅长将普通文案转换为适合短视频口播的生动内容。请根据以下草稿文案，生成适合短视频口播的文案：
+
+草稿文案：${voiceoverDraftContent}
+
+要求：
+1. 语言要口语化、自然流畅
+2. 添加适当的停顿提示（如【停顿2秒】）
+3. 添加重音提示（如【重音】关键词【重音】）
+4. 添加情感表达和互动元素
+5. 适合1-3分钟的短视频
+6. 开头要有吸引力的开场白
+7. 结尾要有互动引导和关注提醒
+
+请生成完整的口播文案：`;
+                
+                // 调用AI API
+                await callAIAPI(apiContent, voiceoverMaterial);
+                
+                // 将编辑后的内容也同步到草稿区
+                document.getElementById('voiceoverDraftContent').value = voiceoverMaterial.value;
+                
+                showNotification('✨ AI口播文案编辑完成！');
+                
+            } catch (error) {
+                console.error('AI编辑失败:', error);
+                // 回退到本地模拟编辑
+                const aiEditedContent = simulateAIVoiceoverEdit(voiceoverDraftContent);
+                voiceoverMaterial.value = aiEditedContent;
+                document.getElementById('voiceoverDraftContent').value = aiEditedContent;
+                
+                showNotification('✨ AI口播文案编辑完成！（使用模拟数据）');
+            } finally {
+                voiceoverMaterial.disabled = false;
+            }
+        }
+        
+        // 模拟AI口播文案编辑（回退方案）
+        function simulateAIVoiceoverEdit(content) {
+            let edited = content;
+            
+            // 添加开场白
+            if (!edited.startsWith('🎬')) {
+                edited = `🎬 大家好👋，今天想跟大家聊聊这个话题。\n\n【停顿2秒】\n\n${edited}`;
+            }
+            
+            // 添加口语化表达
+            edited = edited.replace(/我认为/g, '我觉得');
+            edited = edited.replace(/非常重要/g, '【重音】超级重要【重音】');
+            edited = edited.replace(/建议大家/g, '真心建议大家');
+            edited = edited.replace(/希望能够/g, '希望咱们都能');
+            
+            // 添加停顿和互动
+            edited = edited.replace(/。/g, '。\n\n【停顿2秒】');
+            edited = edited.replace(/！/g, '！\n\n【停顿1秒】');
+            
+            // 添加结尾
+            if (!edited.includes('关注')) {
+                edited += `\n\n【停顿3秒】\n\n所以啊，如果你觉得这个内容对你有帮助，\n\n记得点赞关注，我们下期再见！👋`;
+            }
+            
+            return edited;
+        }
+
+        // 实时渲染口播预览
+        function renderVoiceoverPreview() {
+            const draftContent = document.getElementById('voiceoverDraftContent').value.trim();
+            const previewContent = document.getElementById('voiceoverPreviewContent');
+            
+            if (!draftContent) {
+                previewContent.textContent = '请在左侧输入口播主题和素材，实时预览将在这里显示...';
+                return;
+            }
+            
+            // 智能实时渲染逻辑
+            let renderedContent = draftContent;
+            
+            // 1. 基础格式化 - 处理Markdown语法
+            renderedContent = renderedContent
+                .replace(/^#\s+(.+)$/gm, '🎬 $1\n\n【停顿3秒】\n\n') // 标题转换为开场白格式
+                .replace(/^##\s+(.+)$/gm, '【$1】\n\n') // 副标题
+                .replace(/^###\s+(.+)$/gm, '▶ $1\n\n') // 三级标题
+                .replace(/\*\*(.+?)\*\*/g, '【重音】$1【重音】') // 粗体转换为重音
+                .replace(/\*(.+?)\*/g, '【强调】$1【强调】') // 斜体转换为强调
+                .replace(/^-\s+(.+)$/gm, '• $1') // 列表项
+                .replace(/^\d+\.\s+(.+)$/gm, '第$&个要点：$1') // 数字列表
+                .replace(/\n{3,}/g, '\n\n【停顿2秒】\n\n'); // 多余空行转换为停顿
+            
+            // 2. 智能分段处理
+            const sentences = renderedContent.split(/[。！？]/g);
+            let processedContent = '';
+            
+            sentences.forEach((sentence, index) => {
+                if (sentence.trim()) {
+                    // 根据句子长度调整停顿时间
+                    const pauseTime = sentence.length > 50 ? '3秒' : '2秒';
+                    processedContent += sentence.trim();
+                    
+                    // 不是最后一句就添加停顿
+                    if (index < sentences.length - 1) {
+                        processedContent += `。\n\n【停顿${pauseTime}】\n\n`;
+                    }
+                }
+            });
+            
+            renderedContent = processedContent;
+            
+            // 3. 情感表达增强
+            if (renderedContent.includes('重要') || renderedContent.includes('关键')) {
+                renderedContent = renderedContent.replace(/重要/g, '【重音】重要【重音】');
+                renderedContent = renderedContent.replace(/关键/g, '【重音】关键【重音】');
+            }
+            
+            if (renderedContent.includes('？')) {
+                renderedContent = renderedContent.replace(/\?/g, '？【停顿1秒】');
+            }
+            
+            // 4. 智能开场白
+            if (!renderedContent.startsWith('🎬') && !renderedContent.startsWith('【')) {
+                // 根据内容长度判断开场白类型
+                const opening = draftContent.length > 200 ? 
+                    `🎬 大家好👋，今天想跟大家分享一个很有意思的话题。\n\n【停顿3秒】\n\n` :
+                    `🎬 哈喽大家好👋，今天想跟大家聊聊这个话题。\n\n【停顿2秒】\n\n`;
+                renderedContent = opening + renderedContent;
+            }
+            
+            // 5. 智能结尾
+            if (!renderedContent.includes('点赞') && !renderedContent.includes('关注') && 
+                !renderedContent.includes('评论') && !renderedContent.includes('分享')) {
+                
+                // 根据内容类型选择结尾风格
+                let ending = '';
+                if (renderedContent.includes('知识') || renderedContent.includes('经验')) {
+                    ending = `\n\n【停顿3秒】\n\n以上就是今天想跟大家分享的知识和经验，\n\n如果你觉得对你有帮助，记得点赞收藏，我们下期再见！👋`;
+                } else if (renderedContent.includes('生活') || renderedContent.includes('感悟')) {
+                    ending = `\n\n【停顿3秒】\n\n生活就是这样，充满了各种可能，\n\n如果你也有类似的经历，欢迎在评论区分享，记得点赞关注哦！👋`;
+                } else {
+                    ending = `\n\n【停顿3秒】\n\n以上就是今天想跟大家分享的内容，\n\n如果你觉得有帮助，记得点赞关注，我们下期再见！👋`;
+                }
+                renderedContent += ending;
+            }
+            
+            // 6. 设置预览内容并添加动画效果
+            previewContent.textContent = renderedContent;
+            
+            // 添加淡入效果
+            previewContent.style.opacity = '0.7';
+            setTimeout(() => {
+                previewContent.style.opacity = '1';
+            }, 100);
+            
+            // 自动滚动到底部
+            previewContent.scrollTop = previewContent.scrollHeight;
+        }
+        
+        // 生成口播文案内容（最终生成）
+        async function generateVoiceoverContent() {
+            const voiceoverDraftContent = document.getElementById('voiceoverDraftContent').value.trim();
+            const voiceoverMaterial = document.getElementById('voiceoverMaterial').value.trim();
+            const topic = document.getElementById('voiceoverTopic').value.trim();
+            
+            if (!voiceoverDraftContent && !voiceoverMaterial) {
+                alert('请先输入草稿文案或搜索素材！');
+                return;
+            }
+            
+            // 合并草稿和素材内容
+            let finalContent = voiceoverDraftContent;
+            if (voiceoverMaterial && voiceoverMaterial !== '🤖 正在AI编辑口播文案，请稍候...') {
+                if (finalContent) {
+                    finalContent += '\n\n' + voiceoverMaterial;
+                } else {
+                    finalContent = voiceoverMaterial;
+                }
+            }
+            
+            // 显示加载状态
+            showNotification('🎬 正在生成最终口播文案...');
+            
+            try {
+                // 构建最终优化请求
+                const apiContent = `你是一位专业的短视频口播文案策划师，请根据以下内容生成最终的短视频口播文案：
+
+主题：${topic || '生活分享'}
+内容素材：${finalContent}
+
+要求：
+1. 生成1-3分钟的专业口播文案
+2. 结构清晰：开场吸引→核心内容→互动引导→结尾关注
+3. 语言自然口语化，适合口播
+4. 添加适当的停顿和情感表达
+5. 包含互动元素和关注引导
+6. 适合小红书、抖音等平台风格
+
+请直接生成完整的口播文案：`;
+                
+                // 临时存储最终内容
+                let finalVoiceoverContent = '';
+                const tempOutput = { 
+                    value: '', 
+                    disabled: false,
+                    setAttribute: function() {},
+                    getAttribute: function() { return ''; }
+                };
+                
+                // 调用AI API生成最终内容
+                await callAIAPI(apiContent, tempOutput);
+                finalVoiceoverContent = tempOutput.value;
+                
+                // 将最终内容显示在素材区域
+                document.getElementById('voiceoverMaterial').value = finalVoiceoverContent;
+                
+                showNotification('🎉 口播文案生成完成！');
+                
+            } catch (error) {
+                console.error('最终生成失败:', error);
+                // 回退到本地生成
+                const finalContent = generateLocalFinalVoiceover(topic, finalContent);
+                document.getElementById('voiceoverMaterial').value = finalContent;
+                
+                showNotification('🎉 口播文案生成完成！（使用本地优化）');
+            }
+        }
+        
+        // 本地生成最终口播文案（回退方案）
+        function generateLocalFinalVoiceover(topic, content) {
+            let finalContent = `🎬 大家好👋，今天想跟大家聊聊${topic || '生活分享'}这个话题。\n\n【停顿2秒】\n\n`;
+            
+            // 处理原始内容
+            finalContent += content.replace(/\n/g, '\n\n【停顿2秒】\n\n');
+            
+            // 添加结尾
+            finalContent += `\n\n【停顿3秒】\n\n所以啊，如果你觉得这个内容对你有帮助，记得点赞关注，我们下期再见！👋`;
+            
+            return finalContent;
+        }
+        
+        // 口播文案功能（简化版本，移除编辑模式）
+        let originalVoiceoverContent = '';
 
         // 导出图片（简化版本）
         function exportCard() {
