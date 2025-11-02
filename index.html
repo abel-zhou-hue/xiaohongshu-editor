@@ -291,7 +291,7 @@
         <div class="sidebar">
             <!-- Logo区域 -->
             <div style="text-align: center; margin-bottom: 20px; padding: 20px 15px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <img src="logo.png" alt="小红书知识卡片编辑器" style="width: 180px; height: auto; max-height: 180px; object-fit: contain; display: block; margin-left: auto; margin-right: auto;">
+                <img src="logo.png" alt="Logo" style="width: 180px; height: auto; display: block; margin-left: auto; margin-right: auto;">
             </div>
             <div class="template-item active" data-template="knowledge">
                 <div class="template-title">小红书卡片</div>
@@ -324,6 +324,10 @@
             <div class="template-item" data-template="recruit">
                 <div class="template-title">招聘助手</div>
                 <div class="template-desc">招聘文案和JD模板</div>
+            </div>
+            <div class="template-item" data-template="community">
+                <div class="template-title">社群助手</div>
+                <div class="template-desc">社群运营文案和活动</div>
             </div>
         </div>
 
@@ -519,6 +523,59 @@
             </div>
         </div>
 
+        <!-- 社群助手输入区域 -->
+        <div class="input-area" id="communityInput" style="display: none;">
+            <div class="input-header">
+                <h3>👥 社群助手编辑</h3>
+                <p>输入社群信息，生成社群运营文案</p>
+            </div>
+            
+            <div class="input-group">
+                <label for="communityType">🏢 社群类型</label>
+                <select id="communityType" style="width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px;">
+                    <option value="">请选择社群类型</option>
+                    <option value="learning">学习交流群</option>
+                    <option value="hobby">兴趣爱好群</option>
+                    <option value="product">产品用户群</option>
+                    <option value="vip">VIP客户群</option>
+                    <option value="activity">活动组织群</option>
+                    <option value="industry">行业交流群</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="communityTheme">🎯 活动主题</label>
+                <input type="text" id="communityTheme" placeholder="输入社群活动主题，如：读书分享会、技能提升等" style="width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px;">
+            </div>
+            
+            <div class="input-group">
+                <label for="communityTarget">🎯 目标人群</label>
+                <textarea id="communityTarget" placeholder="描述目标人群特征，如：职场新人、宝妈群体、创业者等"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="communityContent">💬 核心内容</label>
+                <textarea id="communityContent" placeholder="输入想要传达的核心信息或价值点"></textarea>
+            </div>
+            
+            <div class="input-group">
+                <label for="communityTone">🎨 文案风格</label>
+                <select id="communityTone" style="width: 100%; padding: 12px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px;">
+                    <option value="">请选择文案风格</option>
+                    <option value="warm">温暖亲切</option>
+                    <option value="professional">专业权威</option>
+                    <option value="lively">活泼有趣</option>
+                    <option value="formal">正式庄重</option>
+                    <option value="casual">轻松随意</option>
+                </select>
+            </div>
+            
+            <div style="margin: 20px 0;">
+                <button class="btn" onclick="generateCommunityContent()">🤖 生成社群文案</button>
+                <button class="btn" onclick="clearCommunityForm()">🗑️ 清空内容</button>
+            </div>
+        </div>
+
         <!-- 右侧输出区域 -->
         <div class="output-area" id="knowledgeOutput">
             <div class="output-header">
@@ -608,6 +665,35 @@
             <div class="card-preview" id="reviewPreview">
                 <div class="card-content" id="reviewPreviewContent" style="font-size: 14px; line-height: 1.6;">
                     请在左侧输入商品信息，点击生成好评文案按钮来创建您的商品评价...
+                </div>
+            </div>
+        </div>
+
+        <!-- 社群助手输出区域 -->
+        <div class="output-area" id="communityOutput" style="display: none;">
+            <div class="output-header">
+                <h3>👥 社群文案预览</h3>
+                <p>您的社群运营文案效果预览</p>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <button class="btn" onclick="toggleCommunityEdit()">✏️ 编辑模式</button>
+                <button class="btn" onclick="copyCommunityContent()">📋 复制社群文案</button>
+            </div>
+            
+            <!-- 编辑模式文本框 -->
+            <div id="communityEditArea" style="display: none; margin-bottom: 20px;">
+                <textarea id="communityEditContent" style="width: 100%; height: 300px; padding: 15px; border: 2px solid #e1e4e8; border-radius: 8px; font-size: 14px; line-height: 1.6; resize: vertical;" placeholder="在这里编辑您的社群文案..."></textarea>
+                <div style="margin-top: 10px; text-align: center;">
+                    <button class="btn" onclick="saveCommunityEdit()">💾 保存编辑</button>
+                    <button class="btn" onclick="cancelCommunityEdit()" style="background: #6c757d; margin-left: 10px;">❌ 取消</button>
+                </div>
+            </div>
+            
+            <!-- 预览模式 -->
+            <div class="card-preview" id="communityPreview">
+                <div class="card-content" id="communityPreviewContent" style="font-size: 14px; line-height: 1.6;">
+                    请在左侧输入社群信息，点击生成社群文案按钮来创建您的社群运营文案...
                 </div>
             </div>
         </div>
@@ -874,9 +960,11 @@
             document.getElementById('knowledgeInput').style.display = 'none';
             document.getElementById('reviewInput').style.display = 'none';
             document.getElementById('voiceoverInput').style.display = 'none';
+            document.getElementById('communityInput').style.display = 'none';
             document.getElementById('knowledgeOutput').style.display = 'none';
             document.getElementById('reviewOutput').style.display = 'none';
             document.getElementById('voiceoverOutput').style.display = 'none';
+            document.getElementById('communityOutput').style.display = 'none';
             
             // 根据模板类型显示对应的区域
             if (templateType === 'review') {
@@ -887,6 +975,10 @@
                 // 显示口播助手区域
                 document.getElementById('voiceoverInput').style.display = 'block';
                 document.getElementById('voiceoverOutput').style.display = 'block';
+            } else if (templateType === 'community') {
+                // 显示社群助手区域
+                document.getElementById('communityInput').style.display = 'block';
+                document.getElementById('communityOutput').style.display = 'block';
             } else {
                 // 显示知识卡片区域
                 document.getElementById('knowledgeInput').style.display = 'block';
@@ -1013,7 +1105,33 @@
             };
             
             // 构建API请求内容
-            const apiContent = `角色 你是一位专业且经验丰富的宠物服务好评生成大师，对宠物服务行业有着深入透彻的了解，擅长依据各类宠物服务相关信息，生成极具真实感、完美契合美团和大众点评主流风格的高质量好评。 技能 技能 1: 生成好评 当接收到输入的变量${petName}、${serviceProjectNames[serviceProject] || '宠物服务'}、${serviceExperienceNames[serviceExperience] || '服务体验'}、${satisfyingDetailNames[satisfyingDetail] || '无'}、${doctorName || '无'}、${wordCountNames[wordCount] || '100-200字'}以及${otherInfo || '无'}时，充分发挥你深厚的语言功底和对宠物服务行业的敏锐洞察，运用丰富多样的语言技巧，生成好评内容。 好评内容要紧密围绕给定信息全方位展开，深度挖掘并突出服务的独特亮点和令人满意之处，从服务态度、专业水平、环境设施等多个维度展现服务的高品质。 生成的好评语言风格要自然流畅、生动活泼且富有感染力，大量运用自然的口语化表达、网络热词、地方方言等，彻底消除AI生成痕迹，与大众点评和美团好评的常见表述高度一致。 技能 2: 规避AI痕迹 植入非标准细节：在好评中巧妙加入宠物昵称、医生姓氏、设备名称等非通用信息，让好评更具个性。 创造情感波动曲线：构建"犹豫 - 决策 - 庆幸"的心理路径，符合真实的消费决策逻辑，使好评更显真实。 绑定具体时空锚点：融入天气、交通状况、节日氛围等不可预测因素，增添好评的真实场景感。 制造合理缺陷：适当提及一些不影响整体好评的小问题，如等待时间稍长等，通过合理负面细节增强好评可信度。 设备操作可视化：将专业的医疗设备以通俗易懂的画面呈现，让消费者更容易理解服务过程。 设计对话体彩蛋：添加医护人员与宠物之间的趣味互动细节，使好评更加生动有趣。 匹配消费水平：明确消费者身份（如上班族、学生等），避免模糊表述。 跨平台内容关联：关联宠物医院自有媒体内容（如公众号文章、抖音视频等），形成证据链闭环，增强好评的说服力。 适当出错：在文案中巧妙出现1个错别字和2个口语化的表述错误，模拟真实用户评价。 限制: 只专注于生成与宠物相关服务好评相关的内容，坚决拒绝回答无关话题。 所输出的好评内容必须严格符合美团、大众点评的常见风格，做到语言通顺、表意清晰、逻辑连贯。 生成的好评内容要精准控制在${wordCountNames[wordCount] || '100-200字'}字数要求内，不超字也不缺字。`;
+            const apiContent = `你是一位专业且经验丰富的宠物服务好评生成大师，对宠物服务行业有着深入透彻的了解，擅长依据各类宠物服务相关信息，生成极具真实感、完美契合美团和大众点评主流风格的高质量好评。
+
+请根据以下信息生成好评内容：
+- 宠物名字：{{${petName}}}
+- 服务项目：{{${serviceProjectNames[serviceProject] || '宠物服务'}}}
+- 服务体验：{{${serviceExperienceNames[serviceExperience] || '服务体验'}}}
+- 最满意的服务细节：{{${satisfyingDetailNames[satisfyingDetail] || '无'}}}
+- 医生/美容师称呼：{{${doctorName || '无'}}}
+- 字数要求：{{${wordCountNames[wordCount] || '100-200字'}}}
+- 其他信息：{{${otherInfo || '无'}}}
+
+生成要求：
+1. 语言风格要自然流畅、生动活泼且富有感染力
+2. 大量运用自然的口语化表达、网络热词、地方方言等
+3. 彻底消除AI生成痕迹，与大众点评和美团好评的常见表述高度一致
+4. 从服务态度、专业水平、环境设施等多个维度展现服务的高品质
+5. 巧妙加入宠物昵称、医生姓氏、设备名称等非通用信息，让好评更具个性
+6. 构建"犹豫 - 决策 - 庆幸"的心理路径，符合真实的消费决策逻辑
+7. 融入天气、交通状况、节日氛围等不可预测因素，增添真实场景感
+8. 适当提及一些不影响整体好评的小问题，如等待时间稍长等，增强可信度
+9. 将专业的医疗设备以通俗易懂的画面呈现
+10. 添加医护人员与宠物之间的趣味互动细节
+11. 明确消费者身份（如上班族、学生等），避免模糊表述
+12. 关联宠物医院自有媒体内容，形成证据链闭环
+13. 在文案中巧妙出现1个错别字和2个口语化的表述错误，模拟真实用户评价
+14. 严格控制在指定字数要求内，不超字也不缺字
+15. 只专注于生成与宠物相关服务好评相关的内容`;
             
             // 显示加载状态
             const reviewPreviewContent = document.getElementById('reviewPreviewContent');
@@ -1022,34 +1140,26 @@
             }
             
             try {
-                // 调用API
-                const response = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+                // 调用DeepSeek API
+                const response = await fetch('https://api.deepseek.com/chat/completions', {
                     method: 'POST',
                     headers: {
-                        'Authorization': 'Bearer sk-khczjbhzxxujbizmolqceicevnyckmddrhtgbhiyhfkzaujs',
+                        'Authorization': 'Bearer sk-31ea48c648624f37bdca8d17639c2613',
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        model: 'deepseek-ai/DeepSeek-R1',
+                        model: 'deepseek-chat',
                         messages: [
+                            {
+                                role: 'system',
+                                content: 'You are a helpful assistant.'
+                            },
                             {
                                 role: 'user',
                                 content: apiContent
                             }
                         ],
-                        stream: true,
-                        max_tokens: 10000,
-                        enable_thinking: false,
-                        thinking_budget: 4096,
-                        min_p: 0.05,
-                        temperature: 0.7,
-                        top_p: 0.7,
-                        top_k: 50,
-                        frequency_penalty: 0.5,
-                        n: 1,
-                        response_format: {
-                            type: 'text'
-                        }
+                        stream: true
                     })
                 });
                 
@@ -1079,9 +1189,9 @@
                                 const content = parsed.choices?.[0]?.delta?.content || '';
                                 if (content) {
                                     accumulatedContent += content;
-                                    // 实时更新预览区域
+                                    // 实时更新预览区域（支持Markdown格式）
                                     if (reviewPreviewContent) {
-                                        reviewPreviewContent.innerHTML = accumulatedContent.replace(/\n/g, '<br>');
+                                        reviewPreviewContent.innerHTML = marked.parse(accumulatedContent);
                                     }
                                 }
                             } catch (e) {
@@ -1224,6 +1334,315 @@
             const reviewEditContent = document.getElementById('reviewEditContent');
             reviewEditContent.value = originalReviewContent;
             toggleReviewEdit();
+            showNotification('❌ 已取消编辑');
+        }
+
+        // 社群助手功能
+        async function generateCommunityContent() {
+            const communityType = document.getElementById('communityType').value;
+            const communityTheme = document.getElementById('communityTheme').value.trim();
+            const communityTarget = document.getElementById('communityTarget').value.trim();
+            const communityContent = document.getElementById('communityContent').value.trim();
+            const communityTone = document.getElementById('communityTone').value;
+            
+            if (!communityType || !communityTheme || !communityTarget || !communityContent) {
+                alert('请填写完整的社群信息！');
+                return;
+            }
+            
+            // 显示加载状态
+            const communityPreviewContent = document.getElementById('communityPreviewContent');
+            communityPreviewContent.innerHTML = '🤖 正在生成社群文案，请稍候...';
+            
+            try {
+                // 构建API请求内容
+                const apiContent = `你是一位社群运营专家，请根据以下信息生成专业的社群运营文案：
+                
+社群类型：${getCommunityTypeName(communityType)}
+活动主题：${communityTheme}
+目标人群：${communityTarget}
+核心内容：${communityContent}
+文案风格：${getCommunityToneName(communityTone)}
+
+请生成包含以下要素的社群文案：
+1. 吸引人的开场白
+2. 活动介绍和价值说明
+3. 参与方式和规则
+4. 互动引导话术
+5. 结尾呼吁行动
+
+文案要求：专业、有吸引力、适合社群传播。`;
+                
+                // 调用AI API生成内容
+                await callSiliconFlowAPIForCommunity(apiContent, communityPreviewContent);
+                
+            } catch (error) {
+                console.error('社群文案生成失败:', error);
+                // 如果API调用失败，使用模拟生成
+                const simulatedContent = simulateCommunityGeneration({
+                    communityType,
+                    communityTheme,
+                    communityTarget,
+                    communityContent,
+                    communityTone
+                });
+                communityPreviewContent.innerHTML = simulatedContent;
+                showNotification('✨ 社群文案生成完成！（使用模拟数据）');
+            }
+        }
+        
+        async function callSiliconFlowAPIForCommunity(content, outputElement) {
+            const apiUrl = 'https://api.siliconflow.cn/v1/chat/completions';
+            const apiKey = 'sk-pyklkjtrarxygqafyidoclbberxhhqbnzmdrafwuuuiusxzd';
+            
+            const requestBody = {
+                model: "deepseek-ai/DeepSeek-V3.1",
+                messages: [
+                    {
+                        role: "user",
+                        content: content
+                    }
+                ],
+                stream: true,
+                max_tokens: 2000,
+                enable_thinking: false,
+                thinking_budget: 4096,
+                min_p: 0.05,
+                stop: null,
+                temperature: 0.7,
+                top_p: 0.7,
+                top_k: 50,
+                frequency_penalty: 0.5,
+                n: 1,
+                response_format: {
+                    type: "text"
+                }
+            };
+            
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API请求失败: ${response.status}`);
+            }
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let accumulatedContent = '';
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6);
+                        if (data === '[DONE]') continue;
+                        
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices?.[0]?.delta?.content || '';
+                            if (content) {
+                                accumulatedContent += content;
+                                outputElement.innerHTML = accumulatedContent.replace(/\n/g, '<br>');
+                            }
+                        } catch (e) {
+                            // 忽略解析错误
+                        }
+                    }
+                }
+            }
+            
+            showNotification('✨ 社群文案生成完成！');
+        }
+        
+        function simulateCommunityGeneration(data) {
+            const { communityType, communityTheme, communityTarget, communityContent, communityTone } = data;
+            
+            const typeNames = {
+                learning: '学习交流群',
+                hobby: '兴趣爱好群',
+                product: '产品用户群',
+                vip: 'VIP客户群',
+                activity: '活动组织群',
+                industry: '行业交流群'
+            };
+            
+            const toneNames = {
+                warm: '温暖亲切',
+                professional: '专业权威',
+                lively: '活泼有趣',
+                formal: '正式庄重',
+                casual: '轻松随意'
+            };
+            
+            return `🎉 **【${communityTheme}】** 🎉
+
+亲爱的${communityTarget}们，
+
+🌟 **活动介绍**
+${communityContent}
+
+📅 **参与方式**
+• 在群内回复"参加"即可报名
+• 活动时间为本周六晚8点
+• 地点：线上语音房间
+
+💝 **活动亮点**
+• 专业导师在线指导
+• 与同频伙伴深度交流
+• 获得独家学习资料
+• 有机会获得精美礼品
+
+🤝 **互动引导**
+大家有什么想要分享或者想了解的吗？欢迎在群里积极发言，让我们一起打造一个温暖有爱的${typeNames[communityType]}！
+
+⏰ **温馨提示**
+活动名额有限，先到先得哦！赶快行动起来吧～
+
+期待与大家的精彩互动！🚀
+
+---
+#社群活动 #${communityTheme.replace(/\s+/g, '')} #${typeNames[communityType].replace(/\s+/g, '')}`;
+        }
+        
+        function getCommunityTypeName(type) {
+            const typeNames = {
+                learning: '学习交流群',
+                hobby: '兴趣爱好群',
+                product: '产品用户群',
+                vip: 'VIP客户群',
+                activity: '活动组织群',
+                industry: '行业交流群'
+            };
+            return typeNames[type] || '社群';
+        }
+        
+        function getCommunityToneName(tone) {
+            const toneNames = {
+                warm: '温暖亲切',
+                professional: '专业权威',
+                lively: '活泼有趣',
+                formal: '正式庄重',
+                casual: '轻松随意'
+            };
+            return toneNames[tone] || '专业';
+        }
+        
+        // 清空社群助手表单
+        function clearCommunityForm() {
+            document.getElementById('communityType').value = '';
+            document.getElementById('communityTheme').value = '';
+            document.getElementById('communityTarget').value = '';
+            document.getElementById('communityContent').value = '';
+            document.getElementById('communityTone').value = '';
+            // 清空社群文案预览区域
+            const communityPreviewContent = document.getElementById('communityPreviewContent');
+            if (communityPreviewContent) {
+                communityPreviewContent.innerHTML = '请在左侧输入社群信息，点击生成社群文案按钮来创建您的社群运营文案...';
+            }
+        }
+        
+        // 复制社群文案
+        function copyCommunityContent() {
+            const communityPreviewContent = document.getElementById('communityPreviewContent');
+            let communityContent = '';
+            
+            if (communityPreviewContent) {
+                communityContent = communityPreviewContent.innerText || communityPreviewContent.textContent;
+            }
+            
+            if (!communityContent.trim() || communityContent.trim() === '请在左侧输入社群信息，点击生成社群文案按钮来创建您的社群运营文案...') {
+                alert('没有可复制的社群文案！');
+                return;
+            }
+            
+            navigator.clipboard.writeText(communityContent).then(() => {
+                showNotification('✅ 社群文案已复制到剪贴板！');
+            }).catch(err => {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = communityContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showNotification('✅ 社群文案已复制到剪贴板！');
+            });
+        }
+        
+        // 社群文案编辑功能
+        let isCommunityEditMode = false;
+        let originalCommunityContent = '';
+        
+        function toggleCommunityEdit() {
+            const communityEditArea = document.getElementById('communityEditArea');
+            const communityPreview = document.getElementById('communityPreview');
+            const communityEditContent = document.getElementById('communityEditContent');
+            const communityPreviewContent = document.getElementById('communityPreviewContent');
+            const editBtn = event.target;
+            
+            if (!isCommunityEditMode) {
+                // 进入编辑模式
+                originalCommunityContent = communityPreviewContent.innerText || communityPreviewContent.textContent;
+                
+                if (originalCommunityContent.trim() === '请在左侧输入社群信息，点击生成社群文案按钮来创建您的社群运营文案...') {
+                    originalCommunityContent = '';
+                }
+                
+                communityEditContent.value = originalCommunityContent;
+                communityEditArea.style.display = 'block';
+                communityPreview.style.display = 'none';
+                editBtn.textContent = '👁️ 预览模式';
+                editBtn.style.background = '#28a745';
+                isCommunityEditMode = true;
+            } else {
+                // 退出编辑模式
+                communityEditArea.style.display = 'none';
+                communityPreview.style.display = 'block';
+                editBtn.textContent = '✏️ 编辑模式';
+                editBtn.style.background = '#007bff';
+                isCommunityEditMode = false;
+                
+                // 更新预览内容
+                const editedContent = communityEditContent.value.trim();
+                if (editedContent) {
+                    communityPreviewContent.innerHTML = editedContent.replace(/\n/g, '<br>');
+                } else {
+                    communityPreviewContent.innerHTML = '请在左侧输入社群信息，点击生成社群文案按钮来创建您的社群运营文案...';
+                }
+            }
+        }
+        
+        function saveCommunityEdit() {
+            const communityEditContent = document.getElementById('communityEditContent');
+            const communityPreviewContent = document.getElementById('communityPreviewContent');
+            const editedContent = communityEditContent.value.trim();
+            
+            if (editedContent) {
+                communityPreviewContent.innerHTML = editedContent.replace(/\n/g, '<br>');
+                showNotification('✅ 编辑内容已保存！');
+            } else {
+                communityPreviewContent.innerHTML = '请在左侧输入社群信息，点击生成社群文案按钮来创建您的社群运营文案...';
+                showNotification('⚠️ 编辑内容为空，已重置为默认提示');
+            }
+            
+            toggleCommunityEdit();
+        }
+        
+        function cancelCommunityEdit() {
+            const communityEditContent = document.getElementById('communityEditContent');
+            communityEditContent.value = originalCommunityContent;
+            toggleCommunityEdit();
             showNotification('❌ 已取消编辑');
         }
 
@@ -2598,6 +3017,23 @@ ${material}
             const otherInfo = document.getElementById('otherInfo');
             const wordCount = document.getElementById('wordCount');
             
+            // 社群助手事件监听
+            // 监听社群助手表单变化（实时更新）
+            const communityType = document.getElementById('communityType');
+            const communityTopic = document.getElementById('communityTopic');
+            const communityKeywords = document.getElementById('communityKeywords');
+            const communityTone = document.getElementById('communityTone');
+            const communityTarget = document.getElementById('communityTarget');
+            const communityBackground = document.getElementById('communityBackground');
+            
+            // 添加社群助手实时更新监听
+            if (communityType) communityType.addEventListener('input', debounce(updateCommunityPreview, 500));
+            if (communityTopic) communityTopic.addEventListener('input', debounce(updateCommunityPreview, 500));
+            if (communityKeywords) communityKeywords.addEventListener('input', debounce(updateCommunityPreview, 500));
+            if (communityTone) communityTone.addEventListener('change', debounce(updateCommunityPreview, 500));
+            if (communityTarget) communityTarget.addEventListener('input', debounce(updateCommunityPreview, 500));
+            if (communityBackground) communityBackground.addEventListener('input', debounce(updateCommunityPreview, 500));
+            
             // 移除自动触发的事件监听器，改为仅手动生成
             
             // Markdown输出框实时编辑监听
@@ -2673,6 +3109,77 @@ ${material}
                 });
             }
         });
+        
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // 更新社群文案预览
+        function updateCommunityPreview() {
+            const communityType = document.getElementById('communityType');
+            const communityTopic = document.getElementById('communityTopic');
+            const communityKeywords = document.getElementById('communityKeywords');
+            const communityTone = document.getElementById('communityTone');
+            const communityTarget = document.getElementById('communityTarget');
+            const communityBackground = document.getElementById('communityBackground');
+            const communityPreviewContent = document.getElementById('communityPreviewContent');
+            
+            if (!communityPreviewContent) return;
+            
+            // 获取当前表单值
+            const type = communityType ? communityType.value : '';
+            const topic = communityTopic ? communityTopic.value : '';
+            const keywords = communityKeywords ? communityKeywords.value : '';
+            const tone = communityTone ? communityTone.value : '';
+            const target = communityTarget ? communityTarget.value : '';
+            const background = communityBackground ? communityBackground.value : '';
+            
+            // 如果有内容，显示实时预览
+            if (topic || keywords || target) {
+                let preview = '';
+                
+                if (topic) {
+                    preview += `🎯 **主题：${topic}**\n\n`;
+                }
+                
+                if (type) {
+                    preview += `📋 **类型：${getCommunityTypeName(type)}**\n`;
+                }
+                
+                if (tone) {
+                    preview += `🎨 **风格：${getCommunityToneName(tone)}**\n`;
+                }
+                
+                if (target) {
+                    preview += `👥 **目标：${target}**\n`;
+                }
+                
+                if (keywords) {
+                    preview += `🏷️ **关键词：${keywords}**\n`;
+                }
+                
+                if (background) {
+                    preview += `📝 **背景：${background.substring(0, 100)}${background.length > 100 ? '...' : ''}**\n`;
+                }
+                
+                preview += '\n---\n\n';
+                preview += '💡 **实时预览** - 点击"生成社群文案"按钮生成完整内容';
+                
+                communityPreviewContent.innerHTML = marked.parse(preview);
+            } else {
+                // 显示默认提示
+                communityPreviewContent.innerHTML = marked.parse('📝 请在左侧输入区域填写相关信息，这里将显示实时预览...');
+            }
+        }
     </script>
 </body>
 </html>
